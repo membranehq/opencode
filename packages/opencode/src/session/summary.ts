@@ -77,14 +77,22 @@ export namespace SessionSummary {
     const textPart = msgWithParts.parts.find((p) => p.type === "text" && !p.synthetic) as MessageV2.TextPart
     if (textPart && !userMsg.summary?.title) {
       const agent = await Agent.get("title")
+      const titleModel = agent.model
+        ? await Provider.getModel(agent.model.providerID, agent.model.modelID)
+        : ((await Provider.getSmallModel(userMsg.model.providerID)) ??
+          (await Provider.getModel(userMsg.model.providerID, userMsg.model.modelID)))
+      log.info("title", {
+        status: "started",
+        agent: "title",
+        providerID: titleModel.providerID,
+        modelID: titleModel.id,
+        source: agent.model ? "agent-config" : "small-fallback",
+      })
       const stream = await LLM.stream({
         agent,
         user: userMsg,
         tools: {},
-        model: agent.model
-          ? await Provider.getModel(agent.model.providerID, agent.model.modelID)
-          : ((await Provider.getSmallModel(userMsg.model.providerID)) ??
-            (await Provider.getModel(userMsg.model.providerID, userMsg.model.modelID))),
+        model: titleModel,
         small: true,
         messages: [
           {
@@ -103,19 +111,13 @@ export namespace SessionSummary {
         retries: 3,
       })
       const result = await stream.text
-      log.info("title", { title: result })
+      log.info("title", { status: "completed", title: result })
       userMsg.summary.title = result
       await Session.updateMessage(userMsg)
     }
 
-    // Generate summary body if assistant completed a step with file diffs
-    if (
-      diffs.length > 0 &&
-      messages.some(
-        (m) =>
-          m.info.role === "assistant" && m.parts.some((p) => p.type === "step-finish" && p.reason !== "tool-calls"),
-      )
-    ) {
+    // Generate summary body
+    {
       // Prune tool outputs to reduce token usage
       for (const msg of messages) {
         for (const part of msg.parts) {
@@ -130,6 +132,14 @@ export namespace SessionSummary {
           ? await Provider.getModel(summaryAgent.model.providerID, summaryAgent.model.modelID)
           : ((await Provider.getSmallModel(userMsg.model.providerID)) ??
             (await Provider.getModel(userMsg.model.providerID, userMsg.model.modelID)))
+        log.info("body", {
+          status: "started",
+          agent: "summary",
+          providerID: summaryModel.providerID,
+          modelID: summaryModel.id,
+          source: summaryAgent.model ? "agent-config" : "small-fallback",
+          messages: messages.length,
+        })
         const bodyStream = await LLM.stream({
           agent: summaryAgent,
           user: userMsg,
@@ -137,7 +147,7 @@ export namespace SessionSummary {
           model: summaryModel,
           small: true,
           messages: [
-            ...MessageV2.toModelMessages(messages, summaryModel),
+            ...MessageV2.toModelMessage(messages),
             {
               role: "user" as const,
               content: `Summarize the above conversation according to your system prompts.`,
@@ -149,8 +159,8 @@ export namespace SessionSummary {
           retries: 3,
         })
         const bodyResult = await bodyStream.text
+        log.info("body", { status: "completed", body: bodyResult })
         if (bodyResult) {
-          log.info("body", { body: bodyResult })
           userMsg.summary.body = bodyResult
         }
       }
