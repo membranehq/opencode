@@ -30,6 +30,18 @@
 ### Syncing with Upstream
 
 ```bash
+# Using the script (recommended)
+bun run script/membrane-sync.ts          # Sync with upstream/dev
+bun run script/membrane-sync.ts --main   # Sync with upstream/main (stable)
+
+# Then push
+git push origin membrane
+```
+
+<details>
+<summary>Manual steps</summary>
+
+```bash
 # Add upstream remote (one-time)
 git remote add upstream https://github.com/anomalyco/opencode.git
 
@@ -42,9 +54,23 @@ git merge upstream/dev  # or upstream/main for stable releases
 git push origin membrane
 ```
 
-### Version Tags
+</details>
 
-We use tags to mark release points on the `membrane` branch:
+### Creating a Release
+
+```bash
+# Create a version tag (e.g., membrane-v1.0.0)
+bun run script/membrane-release.ts 1.0.0
+
+# Create tag and build binary
+bun run script/membrane-release.ts 1.0.0 --build
+
+# List existing tags
+git tag -l "membrane-*"
+```
+
+<details>
+<summary>Manual steps</summary>
 
 ```bash
 # Create a version tag
@@ -52,23 +78,11 @@ git checkout membrane
 git tag membrane-v1.0.0
 git push origin membrane-v1.0.0
 
-# List existing tags
-git tag -l "membrane-*"
-```
-
-### Building with a Specific Version
-
-The build script respects the `OPENCODE_VERSION` env var:
-
-```bash
-# Build with auto-generated version (default)
-bun run packages/opencode/script/build.ts --single
-
 # Build with specific version
 OPENCODE_VERSION=1.0.0-membrane bun run packages/opencode/script/build.ts --single
 ```
 
-This is used by `membrane/core` agent's setup script to build the binary.
+</details>
 
 ---
 
