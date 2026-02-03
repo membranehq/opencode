@@ -18,6 +18,60 @@
 
 ---
 
+## Membrane Fork
+
+> **This is Membrane's fork of OpenCode.** The `membrane` branch is our source of truth.
+
+### Branch Strategy
+
+- `membrane` - Our main branch with Membrane-specific changes
+- `main`/`dev` - Synced from upstream (anomalyco/opencode)
+
+### Syncing with Upstream
+
+```bash
+# Add upstream remote (one-time)
+git remote add upstream https://github.com/anomalyco/opencode.git
+
+# Fetch and merge upstream changes
+git fetch upstream
+git checkout membrane
+git merge upstream/dev  # or upstream/main for stable releases
+
+# Resolve conflicts if any, then push
+git push origin membrane
+```
+
+### Version Tags
+
+We use tags to mark release points on the `membrane` branch:
+
+```bash
+# Create a version tag
+git checkout membrane
+git tag membrane-v1.0.0
+git push origin membrane-v1.0.0
+
+# List existing tags
+git tag -l "membrane-*"
+```
+
+### Building with a Specific Version
+
+The build script respects the `OPENCODE_VERSION` env var:
+
+```bash
+# Build with auto-generated version (default)
+bun run packages/opencode/script/build.ts --single
+
+# Build with specific version
+OPENCODE_VERSION=1.0.0-membrane bun run packages/opencode/script/build.ts --single
+```
+
+This is used by `membrane/core` agent's setup script to build the binary.
+
+---
+
 ### Installation
 
 ```bash
