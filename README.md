@@ -34,6 +34,18 @@
   <a href="README.tr.md">Türkçe</a>
 </p>
 
+## Important for Contributors
+
+- Do Membrane work on the `membrane` branch (or topic branches cut from `membrane`).
+- Treat `main` and `dev` as upstream-tracking branches, not the source of truth for this fork.
+- If you cloned this repo and landed on another branch, switch to `membrane` before making Membrane-specific changes.
+
+```bash
+git fetch origin
+git checkout membrane
+git pull origin membrane
+```
+
 [![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
 
 ---

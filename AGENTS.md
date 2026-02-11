@@ -109,3 +109,10 @@ const table = sqliteTable("session", {
 
 - Avoid mocks as much as possible
 - Test actual implementation, do not duplicate logic into tests
+
+## Fork Reminder (Append-Only)
+
+- This fork's source branch is `membrane`.
+- Start Membrane-specific work from `origin/membrane`.
+- `main` and `dev` are upstream-tracking branches and may be overwritten by sync.
+- Keep this reminder block at the bottom so upstream syncs are low-conflict.
