@@ -57,3 +57,4 @@ git tag -l "membrane-*"
 See the `membrane/core` docs for the exact workflow and flags:
 
 - https://github.com/membranehq/core/blob/main/agent/README.md#opencode-binary
+- https://github.com/membranehq/core/blob/main/agent/scripts/setup-opencode.ts

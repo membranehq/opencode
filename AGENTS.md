@@ -1,6 +1,6 @@
 - To regenerate the JavaScript SDK, run `./packages/sdk/js/script/build.ts`.
 - ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE.
-- The default branch in this repo is `dev`.
+- The GitHub default branch is `dev`, but Membrane-specific work belongs on `membrane`.
 - Prefer automation: execute requested actions without confirmation unless blocked by missing info or safety/irreversibility.
 
 ## Style Guide
@@ -115,4 +115,11 @@ const table = sqliteTable("session", {
 - This fork's source branch is `membrane`.
 - Start Membrane-specific work from `origin/membrane`.
 - `main` and `dev` are upstream-tracking branches and may be overwritten by sync.
+- Upstream sync scripts (from repo root):
+  - `bun run script/membrane-sync.ts` (sync from upstream `dev`)
+  - `bun run script/membrane-sync.ts --main` (sync from upstream `main`)
+- Membrane release tags use `membrane-v*` (for example `membrane-v1.0.1`).
+- membrane/core OpenCode setup references:
+  - `https://github.com/membranehq/core/blob/main/agent/README.md#opencode-binary`
+  - `https://github.com/membranehq/core/blob/main/agent/scripts/setup-opencode.ts`
 - Keep this reminder block at the bottom so upstream syncs are low-conflict.
