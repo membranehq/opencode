@@ -1,40 +1,125 @@
-# Membrane OpenCode Fork - Agent Notes
-
-## Fork Context
-
-- This repository is Membrane's fork of OpenCode.
-- `membrane` is the source-of-truth branch for Membrane-specific work.
-- `main` and `dev` are kept in sync with upstream (`anomalyco/opencode`) and used as upstream tracking branches.
-
-## Branch Workflow
-
-- Start Membrane work from `origin/membrane`.
-- Keep changes scoped on short-lived topic branches (for example: `membrane/fix-*`, `membrane/feat-*`).
-- Merge or cherry-pick finished fixes back into `membrane`.
-- To sync upstream changes into Membrane branch, use:
-  - `bun run script/membrane-sync.ts` (sync from upstream `dev`)
-  - `bun run script/membrane-sync.ts --main` (sync from upstream `main`)
-- Release tags use the `membrane-v*` format (for example: `membrane-v1.0.0`).
-
-## Build and Test
-
-- To test OpenCode in `packages/opencode`, run `bun dev`.
 - To regenerate the JavaScript SDK, run `./packages/sdk/js/script/build.ts`.
-
-## How membrane/core Consumes This Fork
-
-- `membrane/core/agent` builds the OpenCode binary from this fork via `setup-opencode`.
-- Cached clone path: `~/.membrane/opencode/`.
-- The core agent can target a specific release tag with `bun run setup-opencode --version membrane-vX.Y.Z`.
-
-## Working Rules
-
 - ALWAYS USE PARALLEL TOOLS WHEN APPLICABLE.
-- Prefer Bun tooling for scripts and runtime commands.
+- The GitHub default branch is `dev`, but Membrane-specific work belongs on `membrane`.
+- Prefer automation: execute requested actions without confirmation unless blocked by missing info or safety/irreversibility.
+
+## Style Guide
+
+### General Principles
+
+- Keep things in one function unless composable or reusable
+- Avoid `try`/`catch` where possible
+- Avoid using the `any` type
+- Prefer single word variable names where possible
+- Use Bun APIs when possible, like `Bun.file()`
+- Rely on type inference when possible; avoid explicit type annotations or interfaces unless necessary for exports or clarity
+- Prefer functional array methods (flatMap, filter, map) over for loops; use type guards on filter to maintain type inference downstream
+
+### Naming
+
+Prefer single word names for variables and functions. Only use multiple words if necessary.
+
+```ts
+// Good
+const foo = 1
+function journal(dir: string) {}
+
+// Bad
+const fooBar = 1
+function prepareJournal(dir: string) {}
+```
+
+Reduce total variable count by inlining when a value is only used once.
+
+```ts
+// Good
+const journal = await Bun.file(path.join(dir, "journal.json")).json()
+
+// Bad
+const journalPath = path.join(dir, "journal.json")
+const journal = await Bun.file(journalPath).json()
+```
+
+### Destructuring
+
+Avoid unnecessary destructuring. Use dot notation to preserve context.
+
+```ts
+// Good
+obj.a
+obj.b
+
+// Bad
+const { a, b } = obj
+```
+
+### Variables
+
+Prefer `const` over `let`. Use ternaries or early returns instead of reassignment.
+
+```ts
+// Good
+const foo = condition ? 1 : 2
+
+// Bad
+let foo
+if (condition) foo = 1
+else foo = 2
+```
+
+### Control Flow
+
+Avoid `else` statements. Prefer early returns.
+
+```ts
+// Good
+function foo() {
+  if (condition) return 1
+  return 2
+}
+
+// Bad
+function foo() {
+  if (condition) return 1
+  else return 2
+}
+```
+
+### Schema Definitions (Drizzle)
+
+Use snake_case for field names so column names don't need to be redefined as strings.
+
+```ts
+// Good
+const table = sqliteTable("session", {
+  id: text().primaryKey(),
+  project_id: text().notNull(),
+  created_at: integer().notNull(),
+})
+
+// Bad
+const table = sqliteTable("session", {
+  id: text("id").primaryKey(),
+  projectID: text("project_id").notNull(),
+  createdAt: integer("created_at").notNull(),
+})
+```
+
+## Testing
+
+- Avoid mocks as much as possible
+- Test actual implementation, do not duplicate logic into tests
 
 ## Fork Reminder (Append-Only)
 
 - This fork's source branch is `membrane`.
 - Start Membrane-specific work from `origin/membrane`.
 - `main` and `dev` are upstream-tracking branches and may be overwritten by sync.
+- Upstream sync scripts (from repo root):
+  - `bun run script/membrane-sync.ts` (sync from upstream `dev`)
+  - `bun run script/membrane-sync.ts --main` (sync from upstream `main`)
+- Membrane release tags use `membrane-v*` (for example `membrane-v1.0.1`).
+- membrane/core OpenCode setup references:
+  - `https://github.com/membranehq/core/blob/main/agent/README.md#opencode-binary`
+  - `https://github.com/membranehq/core/blob/main/agent/scripts/setup-opencode.ts`
 - Keep this reminder block at the bottom so upstream syncs are low-conflict.
