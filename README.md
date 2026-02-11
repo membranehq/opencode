@@ -2,6 +2,18 @@
 
 > **This is Membrane's fork of [OpenCode](https://github.com/anomalyco/opencode).** The `membrane` branch is our source of truth.
 
+## Important for Contributors
+
+- Do Membrane work on the `membrane` branch (or topic branches cut from `membrane`).
+- Treat `main` and `dev` as upstream-tracking branches, not the source of truth for this fork.
+- If you cloned this repo and landed on another branch, switch to `membrane` before making Membrane-specific changes.
+
+```bash
+git fetch origin
+git checkout membrane
+git pull origin membrane
+```
+
 For original OpenCode documentation, see [upstream README](https://github.com/anomalyco/opencode#readme).
 
 ---
