@@ -54,10 +54,6 @@ git tag -l "membrane-*"
 
 `membrane/core/agent` builds and runs the OpenCode binary from this fork via `setup-opencode`.
 
-```bash
-cd membrane/core/agent
-bun run setup-opencode
-bun run setup-opencode --update
-bun run setup-opencode --force
-bun run opencode
-```
+See the `membrane/core` docs for the exact workflow and flags:
+
+- https://github.com/membranehq/core/blob/main/agent/README.md#opencode-binary
