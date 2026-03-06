@@ -41,9 +41,26 @@ describe("Truncate", () => {
       expect(result.content).toContain("truncated...")
     })
 
-    test("truncates from head by default", async () => {
+    test("truncates from middle by default, keeping head and tail", async () => {
+      const lines = Array.from({ length: 20 }, (_, i) => `line${i}`).join("\n")
+      const result = await Truncate.output(lines, { maxLines: 10 })
+
+      expect(result.truncated).toBe(true)
+      // Head portion (~30%) should be kept
+      expect(result.content).toContain("line0")
+      expect(result.content).toContain("line1")
+      expect(result.content).toContain("line2")
+      // Tail portion (~70%) should be kept
+      expect(result.content).toContain("line19")
+      expect(result.content).toContain("line18")
+      expect(result.content).toContain("line17")
+      // Middle should be truncated
+      expect(result.content).toContain("truncated")
+    })
+
+    test("truncates from head when direction is head", async () => {
       const lines = Array.from({ length: 10 }, (_, i) => `line${i}`).join("\n")
-      const result = await Truncate.output(lines, { maxLines: 3 })
+      const result = await Truncate.output(lines, { maxLines: 3, direction: "head" })
 
       expect(result.truncated).toBe(true)
       expect(result.content).toContain("line0")
@@ -61,6 +78,23 @@ describe("Truncate", () => {
       expect(result.content).toContain("line8")
       expect(result.content).toContain("line9")
       expect(result.content).not.toContain("line0")
+    })
+
+    test("middle truncation prioritizes tail over head (70/30 split)", async () => {
+      const lines = Array.from({ length: 100 }, (_, i) => `line${i}`).join("\n")
+      const result = await Truncate.output(lines, { maxLines: 10, direction: "middle" })
+
+      expect(result.truncated).toBe(true)
+      // Head gets ~30% = 3 lines
+      expect(result.content).toContain("line0")
+      expect(result.content).toContain("line1")
+      expect(result.content).toContain("line2")
+      // Tail gets ~70% = 7 lines
+      expect(result.content).toContain("line99")
+      expect(result.content).toContain("line98")
+      expect(result.content).toContain("line93")
+      // Middle should not be present
+      expect(result.content).not.toContain("line50")
     })
 
     test("uses default MAX_LINES and MAX_BYTES", () => {
